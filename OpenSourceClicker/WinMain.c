@@ -52,6 +52,24 @@ LRESULT CALLBACK KeyboardCallBack( int nCode, WPARAM wParam, LPARAM lParam )
 	return CallNextHookEx( keyboardHook, nCode, wParam, lParam );
 }
 
+DWORD WINAPI HookThread( LPVOID lParam )
+{
+	mouseHook = SetWindowsHookEx( WH_MOUSE_LL, &MouseCallBack, NULL, NULL );
+	keyboardHook = SetWindowsHookEx( WH_KEYBOARD_LL, &KeyboardCallBack, NULL, NULL );
+
+	// Infinite loop basically.
+	MSG msg;
+	while ( GetMessage( &msg, NULL, 0, 0 ) )
+	{
+		TranslateMessage( &msg );
+		DispatchMessage( &msg );
+	}
+
+	UnhookWindowsHookEx( mouseHook );
+	UnhookWindowsHookEx( keyboardHook );
+	return 0;
+}
+
 int RandomInt( int min, int max )
 {
 	srand( time( NULL ) );
@@ -94,21 +112,15 @@ int wmain()
 {
 	SetConsoleTitle( L"" );
 
-	mouseHook = SetWindowsHookEx( WH_MOUSE_LL, &MouseCallBack, NULL, NULL );
-	keyboardHook = SetWindowsHookEx( WH_KEYBOARD_LL, &KeyboardCallBack, NULL, NULL );
-
+	CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)&HookThread, NULL, 0, 0 );
 	CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)&ClickThread, NULL, 0, 0 );
 
-	// Infinite loop basically.
-	MSG msg;
-	while ( GetMessage( &msg, NULL, 0, 0 ) )
+	while( TRUE )
 	{
-		TranslateMessage( &msg );
-		DispatchMessage( &msg );
+		Sleep( 100 );
+		system( "cls" );
+		printf( "Status: %s\n", ( toggled ? "On" : "Off" ) );
 	}
-
-	UnhookWindowsHookEx( mouseHook );
-	UnhookWindowsHookEx( keyboardHook );
 
 	printf( "An error has ocurred while the program was running, as a result the program will be closed.\n" );
 	_getch();
