@@ -22,7 +22,7 @@ LRESULT CALLBACK MouseCallBack( int nCode, WPARAM wParam, LPARAM lParam )
 		if ( WM_MOUSEMOVE != wParam )
 		{
 			// if this returns 0, we know it's a real click. see: https://msdn.microsoft.com/en-us/library/windows/desktop/ms644970(v=vs.85).aspx
-			if ( !pMouse->flags )
+			if ( 0 == pMouse->flags )
 			{
 				switch ( wParam )
 				{
